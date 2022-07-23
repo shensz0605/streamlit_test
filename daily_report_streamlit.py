@@ -3,12 +3,12 @@ import numpy as np
 import streamlit as st
 import plotly.express as px
 
-from pyecharts import options as opts
-from pyecharts.charts import Page,Grid,Geo,Bar,Line,Scatter,Tab,Timeline
-from pyecharts.globals import ChartType, SymbolType
+#from pyecharts import options as opts
+#from pyecharts.charts import Page,Grid,Geo,Bar,Line,Scatter,Tab,Timeline
+#from pyecharts.globals import ChartType, SymbolType
 
-from pyecharts.components import Table
-from pyecharts.options import ComponentTitleOpts
+#from pyecharts.components import Table
+#from pyecharts.options import ComponentTitleOpts
 
 st.title('实收日报')
 
