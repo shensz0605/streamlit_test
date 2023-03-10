@@ -5,10 +5,10 @@ import numpy as np
 import streamlit as st
 import plotly.express as px
 
-import sys
-sys.path.append('./pylib/')
+#import sys
+#sys.path.append('./pylib/')
 
-from download_data import *
+#from download_data import *
 
 #from pyecharts import options as opts
 #from pyecharts.charts import Page,Grid,Geo,Bar,Line,Scatter,Tab,Timeline
@@ -23,14 +23,14 @@ st.title('实收日报')
 #I.load data
 ########################
 
-sql = "select * from adm_loan_model.amx_daily_case_sum"
+#sql = "select * from adm_loan_model.amx_daily_case_sum"
 
-refresh_data=st.button("刷新数据")
+#refresh_data=st.button("刷新数据")
 
-if refresh_data==True:
-   data = query_presto_pyhive(sql)
-   data_df = pd.DataFrame(data['values'],columns=data['fields'])
-   data_df.to_csv('./adm_loan_model.amx_daily_case_sum.csv',index=False)
+#if refresh_data==True:
+#   data = query_presto_pyhive(sql)
+#   data_df = pd.DataFrame(data['values'],columns=data['fields'])
+#   data_df.to_csv('./adm_loan_model.amx_daily_case_sum.csv',index=False)
 
 df=pd.read_csv('./adm_loan_model.amx_daily_case_sum.csv')
 
