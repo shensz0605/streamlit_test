@@ -1,4 +1,4 @@
-from pyhive import presto
+#from pyhive import presto
 
 import pandas as pd
 import numpy as np
