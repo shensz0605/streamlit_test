@@ -1,7 +1,14 @@
+from pyhive import presto
+
 import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
+
+import sys
+sys.path.append('./pylib/')
+
+from download_data import *
 
 #from pyecharts import options as opts
 #from pyecharts.charts import Page,Grid,Geo,Bar,Line,Scatter,Tab,Timeline
@@ -15,6 +22,16 @@ st.title('实收日报')
 ########################
 #I.load data
 ########################
+
+sql = "select * from adm_loan_model.amx_daily_case_sum"
+
+refresh_data=st.button("刷新数据")
+
+if refresh_data==True:
+   data = query_presto_pyhive(sql)
+   data_df = pd.DataFrame(data['values'],columns=data['fields'])
+   data_df.to_csv('./adm_loan_model.amx_daily_case_sum.csv',index=False)
+
 df=pd.read_csv('./adm_loan_model.amx_daily_case_sum.csv')
 
 ########################
@@ -63,7 +80,7 @@ df_sum_level_2=df[df['法诉']!=1].groupby(['asset_name','mth','disposer_name','
 df_sum_level_2['repaid_amt_cum']=df_sum_level_2.groupby(['asset_name','mth','disposer_name'])['repaid_amt'].cumsum()
 df_sum_level_2['repaid_pct_cum']=100*df_sum_level_2['repaid_amt_cum']/df_sum_level_2['assign_amt_principal']
 df_sum_level_2['dt_2']=df_sum_level_2['dt'].apply(lambda x:pd.to_datetime(x).date())
-df_sum_level_2['n_case_max']=df_sum_level_2.groupby(['mth','disposer_name'])['n_case'].transform('max')
+df_sum_level_2['n_case_max']=df_sum_level_2.groupby(['mth','asset_name','disposer_name'])['n_case'].transform('max')
 
 df_sum_level_1b=df_sum_level_1.pivot_table(index=['asset_name','day'],columns='mth',values=['n_case','assign_amt_principal','repaid_amt_cum','repaid_pct_cum']).reset_index('day',drop=False)
 df_sum_level_2b=df_sum_level_2.pivot_table(index=['asset_name','disposer_name','day'],columns='mth',values=['n_case','assign_amt_principal','repaid_amt','repaid_amt_cum','repaid_pct_cum']).reset_index(['day'],drop=False)
@@ -101,10 +118,13 @@ fig2 = px.bar(tmp2[tmp2['disposer_name'].isin(list_disposer)], x = 'dt', y = 're
 
 st.plotly_chart(fig2)
 
-###当月累计回款by 机构
+###月初分案by 机构
 tmp2_b=df_sum_level_2[(df_sum_level_2['asset_name']==asset_selected) & (df_sum_level_2['mth']==mth_max)].sort_values(['n_case_max','day'],ascending=[False,True])
 list_disposer_b=[i for i in tmp2_b[(tmp2_b['day']==1) & (tmp2_b['n_case']>=200)].sort_values('n_case',ascending=False)['disposer_name'].unique() if i not in ['停催','空闲机构']]
 
+st.dataframe(tmp2_b.loc[(tmp2_b['disposer_name'].isin(list_disposer_b)) & (tmp2_b['day']==1),['mth','disposer_name','n_case']].reset_index(drop=True))
+
+###当月累计回款by 机构
 fig2_b = px.line(tmp2_b[tmp2_b['disposer_name'].isin(list_disposer_b)], x = 'dt', y = 'repaid_pct_cum',color="disposer_name")
 
 st.plotly_chart(fig2_b)
